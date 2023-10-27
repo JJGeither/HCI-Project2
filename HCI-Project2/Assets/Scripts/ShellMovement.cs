@@ -8,6 +8,7 @@ public class ShellMovement : MonoBehaviour
     // Public Variables
     [SerializeField] public float shellSpeed;
     public GameObject playerObject;
+    public float rotationSpeed;
 
     // Private Variables
     Rigidbody _rb;
@@ -22,7 +23,7 @@ public class ShellMovement : MonoBehaviour
     {
 
         // Check if 'J' key is pressed and transform the object
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             // Transform this object to match the targetObject
             playerObject.SetActive(true);
@@ -30,12 +31,23 @@ public class ShellMovement : MonoBehaviour
             _rb.velocity = Vector3.zero;
             this.gameObject.SetActive(false);
         }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            _rb.velocity = _rb.velocity + Vector3.up * 10;
+        }
     }
 
     void FixedUpdate()
     {
+
+
+
         lastVelocity = _rb.velocity;
-        _rb.velocity = (Vector3.Normalize(_rb.velocity) * 50);
+
+        // Rotate the object
+        transform.Rotate(Vector3.up * (rotationSpeed * Mathf.Sqrt(_rb.velocity.x * _rb.velocity.x + _rb.velocity.y * _rb.velocity.y + _rb.velocity.z * _rb.velocity.z)) );
+        //_rb.velocity = (Vector3.Normalize(_rb.velocity) * 50);
     }
 
     private void OnCollisionEnter(Collision collision)

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
     public float acceleration;
     public float deceleration;
     public GameObject shellObject;
+    public float gravityScale;
 
     // Private Variables
     Rigidbody _rb;
@@ -17,18 +19,19 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         _rb = this.gameObject.GetComponent<Rigidbody>();
+        _rb.useGravity = false;
     }
 
     private void Update()
     {
         // Check if 'J' key is pressed and transform the object
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             // Transform this object to match the targetObject
 
             shellObject.SetActive(true);
             shellObject.transform.position = this.transform.position;
-            shellObject.GetComponent<Rigidbody>().velocity = _rb.velocity;
+            shellObject.GetComponent<Rigidbody>().velocity = _rb.velocity * 2;
             this.gameObject.SetActive(false);
 
         }
@@ -59,12 +62,13 @@ public class PlayerMovement : MonoBehaviour
 
         float verticalMovement = clampedVerticalInput * _playerSpeed * Time.fixedDeltaTime;
         float horizontalMovement = clampedHorizontalInput * _playerSpeed * Time.fixedDeltaTime;
-        float rotation = clampedHorizontalInput * rotationSpeed * Time.fixedDeltaTime;
 
-        _rb.velocity = new Vector3(horizontalMovement, 0, verticalMovement);
+        Vector3 movement = new Vector3(horizontalMovement, 0.0f, verticalMovement);
 
-        // Rotate the object
-        //transform.Rotate(Vector3.up * rotation);
+        movement = Quaternion.Euler(0, Camera.main.transform.eulerAngles.y, 0) * movement;
+
+        _rb.velocity = movement;
+        _rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);
 
 
     }

@@ -4,34 +4,28 @@ using UnityEngine;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
+    public GameObject target;
+    public float smoothSpeed = 0.125f;
+    public Vector3 locationOffset;
+    public float distance = 5.0f; // The fixed distance from the target
+    public float rotationSpeed = 2.0f; // Speed of mouse X rotation
 
-    GameObject player;
-    public Vector3 offset;
+    private float currentRotationAngle = 0.0f;
+    private Transform playerTransform;
 
-    public float speedH = 2.0f;
-    public float speedV = 2.0f;
-
-    private float yaw = 0.0f;
-    private float pitch = 0.0f;
-
-    private void Start()
+    void FixedUpdate()
     {
-        
-    }
+        target = GameObject.FindGameObjectWithTag("Player");
+        playerTransform = target.transform;
 
-    void LateUpdate()
-    {
-        player = GameObject.FindGameObjectWithTag("Player");  // Get player object
-        if (player != null)
-        {
-            Vector3 pos = player.transform.position;  // Get player position
+        // Calculate the desired camera position based on the target's position and rotation
+        Vector3 offset = Quaternion.Euler(0, currentRotationAngle, 0) * (locationOffset + Vector3.back * distance);
+        Vector3 desiredPosition = playerTransform.position + offset;
+        Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
+        transform.position = smoothedPosition;
 
-            Camera.main.transform.position = new Vector3(pos.x, pos.y, pos.z) + offset;  // Translate main camera to players position (follow)
-        }
-
-        // Update camera rotation based on user input.
-        yaw += speedH * Input.GetAxis("Mouse X");
-        pitch -= speedV * Input.GetAxis("Mouse Y");
-        transform.eulerAngles = new Vector3(pitch, yaw, 0.0f);
+        // Apply mouse X rotation to the camera
+        currentRotationAngle += rotationSpeed * Input.GetAxis("Mouse X");
+        transform.LookAt(target.transform.position);
     }
 }

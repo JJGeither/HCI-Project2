@@ -13,25 +13,16 @@ public class ShellMovement : MonoBehaviour
     // Private Variables
     Rigidbody _rb;
     Vector3 lastVelocity;
+    PlayerController _playerController;
 
     private void Start()
     {
         _rb = this.gameObject.GetComponent<Rigidbody>();
+        _playerController = this.transform.parent.GetComponent<PlayerController>();
     }
 
     private void Update()
     {
-
-        // Check if 'J' key is pressed and transform the object
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            // Transform this object to match the targetObject
-            playerObject.SetActive(true);
-            playerObject.transform.position = this.transform.position;
-            _rb.velocity = Vector3.zero;
-            this.gameObject.SetActive(false);
-        }
-
         if (Input.GetKeyDown(KeyCode.Space))
         {
             _rb.velocity = _rb.velocity + Vector3.up * 10;
@@ -40,8 +31,6 @@ public class ShellMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-
-
 
         lastVelocity = _rb.velocity;
 

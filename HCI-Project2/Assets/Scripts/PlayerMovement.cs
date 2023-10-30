@@ -3,37 +3,54 @@ using UnityEngine.UIElements;
 
 public class PlayerMovement : MonoBehaviour
 {
-    // Public Variables
+    [Header("Public Variables")]
+    [SerializeField]
     public float playerMaxSpeed;
+
+    [SerializeField]
     public float playerMinSpeed;
-    public float rotationSpeed;
+
+    [SerializeField]
     public float acceleration;
+
+    [SerializeField]
     public float deceleration;
+
+    [SerializeField]
     public GameObject shellObject;
+
+    [SerializeField]
     public float gravityScale;
+
+    [SerializeField]
+    public float gravityScaleIdle;
+
+    [SerializeField]
+    public float jumpForce;
+
+    private bool isJumping = false; // Flag to indicate jump input
+
+    private float _playerSpeed;
+    private float _jumpForce = 0; // The current jump force
 
     // Private Variables
     Rigidbody _rb;
-    float _playerSpeed = 0.0f;
+    PlayerController _playerController;
 
     private void Start()
     {
         _rb = this.gameObject.GetComponent<Rigidbody>();
         _rb.useGravity = false;
+        _playerController = this.transform.parent.GetComponent<PlayerController>();
     }
 
-    private void Update()
+    public void Update()
     {
-        // Check if 'J' key is pressed and transform the object
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.Space) && _playerController.GetIsGrounded())
         {
-            // Transform this object to match the targetObject
-
-            shellObject.SetActive(true);
-            shellObject.transform.position = this.transform.position;
-            shellObject.GetComponent<Rigidbody>().velocity = _rb.velocity * 2;
-            this.gameObject.SetActive(false);
-
+            isJumping = true;
+            _jumpForce = jumpForce; // Initialize jump force
+            Debug.Log("Space key pressed");
         }
     }
 
@@ -67,10 +84,25 @@ public class PlayerMovement : MonoBehaviour
 
         movement = Quaternion.Euler(0, Camera.main.transform.eulerAngles.y, 0) * movement;
 
-        _rb.velocity = movement;
-        _rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);
+        // Apply both jump force and movement velocity
+        Vector3 totalVelocity = movement + Vector3.up * _jumpForce;
+        _rb.velocity = totalVelocity;
 
+        if (isJumping)
+        {
+            // Gradually decrease jumpForce to make it smoother
+            _jumpForce -= Time.fixedDeltaTime * 50;
 
+            if (_jumpForce <= 0)
+            {
+                isJumping = false;
+                _jumpForce = 0;
+            }
+        }
+
+        if (!_playerController.GetIsGrounded())
+            _rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);
+        else
+            _rb.AddForce(Physics.gravity * gravityScaleIdle, ForceMode.Acceleration);
     }
 }
-    
